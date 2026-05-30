@@ -176,4 +176,4 @@ GET /?c=flag=byuctf{...}
 
 ---
 
-*Writeup by [your-handle] · CTF: BYUCTF · Date: 2026-05-26*
+*Writeup by [nvd] · CTF: BYUCTF · Date: 2026-05-26*
