@@ -1,3 +1,4 @@
+[byuctf-writeup (1).md](https://github.com/user-attachments/files/28432035/byuctf-writeup.1.md)
 # BYUCTF — Web Challenges Writeup
 
 > **CTF:** BYUCTF · **Category:** Web
@@ -15,6 +16,9 @@
   - [Reconnaissance](#reconnaissance-2)
   - [Bypassing the Blocklist](#bypassing-the-blocklist)
   - [Exploitation](#exploitation-2)
+- [Challenge 3 — On Point (Admin Escalation)](#challenge-3--on-point-admin-escalation)
+  - [Overview](#overview-3)
+  - [Exploitation](#exploitation-3)
 - [Flags Summary](#flags-summary)
 - [Takeaways](#takeaways)
 
@@ -155,12 +159,66 @@ GET /?c=flag=byuctf{...}
 
 ---
 
+## Challenge 3 — On Point (Admin Escalation)
+
+### Overview-3
+
+This challenge is a **direct continuation** of Challenge 2. The cookie stolen from the bot in Challenge 2 contains the admin's session credential. The goal is to use that credential to log in as admin and access the restricted flag panel.
+
+| Field      | Detail                                                   |
+|------------|----------------------------------------------------------|
+| Technique  | Cookie Hijacking → Privilege Escalation → Admin Panel    |
+| Depends on | Cookie stolen in Challenge 2 (`admin_pass` value)        |
+| Tool       | Burp Suite / Browser DevTools                            |
+
+---
+
+### Exploitation-3
+
+#### Step 1 — Retrieve the Stolen Cookie
+
+From the webhook captured in Challenge 2, extract the `admin_pass` cookie value from the bot's session:
+
+```
+admin_pass=super_secret_admin_password_999_lol
+```
+
+#### Step 2 — Inject Cookie into Browser Session
+
+Open the application in the browser and navigate to **DevTools → Application → Cookies**. Replace (or add) the `admin_pass` cookie with the stolen value:
+
+```
+Name:   admin_pass
+Value:  super_secret_admin_password_999_lol
+```
+
+Alternatively, inject it via Burp Suite by editing the `Cookie` header in any request to the application.
+
+#### Step 3 — Access the Admin Panel
+
+Reload the page or navigate to the admin/flag endpoint. The server validates the `admin_pass` cookie, recognises the value as the admin credential, and grants access to the privileged panel.
+
+**Result:** The **All Support Tickets** admin dashboard is now accessible, and the flag is displayed at the top of the page. ✓
+
+```
+Flow:
+
+Challenge 2 webhook
+    → c=admin_pass=super_secret_admin_password_999_lol
+        → inject into browser cookie store
+            → reload app as admin
+                → FLAG displayed in admin panel
+```
+
+---
+
 ## Flags Summary
 
-| # | Challenge       | Technique                              | How Flag Was Retrieved                        |
-|---|-----------------|----------------------------------------|-----------------------------------------------|
-| 1 | My Cat Website  | Hidden parameter injection             | Added `"get_flag": true` to JSON POST body    |
-| 2 | On Point        | XSS bypass via `onfocus` + `autofocus` | Cookie exfiltrated to webhook via bot visit   |
+| # | Challenge                     | Technique                              | How Flag Was Retrieved                                     |
+|---|-------------------------------|----------------------------------------|------------------------------------------------------------|
+| 1 | My Cat Website                | Hidden parameter injection             | Added `"get_flag": true` to JSON POST body                 |
+| 2 | On Point                      | XSS bypass via `onfocus` + `autofocus` | Cookie exfiltrated to webhook via bot visit                |
+| 3 | On Point (Admin Escalation)   | Cookie hijacking → Privilege escalation| Injected stolen `admin_pass` cookie → accessed admin panel |
 
 ---
 
@@ -173,6 +231,8 @@ GET /?c=flag=byuctf{...}
 | 3 | **`autofocus` = zero-click XSS** — combined with `onfocus`, it fires without any user interaction, making it ideal for bot-based challenges |
 | 4 | **`document.location` is not `fetch`** — when `fetch` and `XMLHttpRequest` are blocked, redirecting via `document.location` is a reliable cookie exfiltration alternative |
 | 5 | **Bot victims = stored XSS targets** — if a challenge provides a bot that visits links, the intended solution almost always involves cookie theft via XSS |
+| 6 | **Challenges chain** — the cookie from Challenge 2 is the key to Challenge 3; always carry findings forward across challenges in a CTF |
+| 7 | **Admin cookies in plain text** — storing credentials like `admin_pass=super_secret_admin_password_999_lol` in an unencrypted, non-HttpOnly cookie is a critical misconfiguration |
 
 ---
 
