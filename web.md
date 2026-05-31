@@ -1,4 +1,5 @@
-[byuctf-writeup (1).md](https://github.com/user-attachments/files/28432035/byuctf-writeup.1.md)
+[byuctf-writeup (2).md](https://github.com/user-attachments/files/28432079/byuctf-writeup.2.md)
+
 # BYUCTF — Web Challenges Writeup
 
 > **CTF:** BYUCTF · **Category:** Web
@@ -159,11 +160,11 @@ GET /?c=flag=byuctf{...}
 
 ---
 
-## Challenge 3 — On Point (Admin Escalation)
+## Challenge 3 — baby (Admin Escalation)
 
 ### Overview-3
 
-This challenge is a **direct continuation** of Challenge 2. The cookie stolen from the bot in Challenge 2 contains the admin's session credential. The goal is to use that credential to log in as admin and access the restricted flag panel.
+This challenge is an **easier variant** of the On Point series. Rather than solving it from scratch, we leveraged the `admin_pass` value already recovered from the harder Challenge 2 and applied it here directly — the same credential works across both challenges. The goal is to inject it as a cookie to gain admin access and retrieve the flag.
 
 | Field      | Detail                                                   |
 |------------|----------------------------------------------------------|
